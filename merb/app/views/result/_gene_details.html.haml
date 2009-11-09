@@ -1,0 +1,36 @@
+- genes_info = info[:genes_info]
+- group = info[:group]
+
+Note: GO terms here may differ from those used in Genecodis
+%table#gene_details
+  %thead
+    %th.span_3
+      Gene
+    %th.span_5
+      Synonyms
+    %th.span_1
+      Articles
+    %th.span_8
+      GO Terms
+  %tbody
+    - genes_info.each do |gene, info|
+      %tr
+        %td.gene
+          - if info[:url]
+            %a{ :href => info[:url] }
+              = info[:name]
+          - else
+            info[:name]
+        %td.synonyms
+          = info[:synonyms].join(", ")
+        - if group.nil?
+          %td.articles 
+            = info[:articles].length 
+        - else
+          %td.articles 
+            %a.literature{:href =>"/literature/#{group.job.complete_name}/#{group.number}/#{gene}"}
+              = info[:articles].length
+        %td.goterms
+          %ul.goterms
+            - info[:goterms].each do |goterm|
+              %li= go_info(goterm)

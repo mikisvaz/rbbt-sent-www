@@ -6,11 +6,28 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "rbbt-sent-www"
     gem.summary = %Q{SENT online interface}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.description = %Q{This package contains a SOAP web server and a merb application.}
     gem.email = "miguel.vazquez@fdi.ucm.es"
     gem.homepage = "http://github.com/mikisvaz/rbbt-sent-www"
     gem.authors = ["Miguel Vazquez"]
-    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+
+    gem.files = Dir['merb', 'webservice', 'lib/*']
+    gem.files.exclude 'merb/tmp/*' 
+    gem.files.exclude 'merb/public/tmp'
+    gem.files.exclude 'merb/public/results'
+    gem.files.exclude 'merb/public/data'
+
+    gem.add_dependency('MARQ')
+    gem.add_dependency('rbbt')
+
+    gem.add_dependency('merb')
+    gem.add_dependency('simplews')
+    gem.add_dependency('rmail')
+    gem.add_dependency('RedCloth')
+    gem.add_dependency('rand')
+    gem.add_dependency('xml-simple')
+
+
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError

@@ -1,0 +1,38 @@
+
+%head  
+  %meta{ 'http-equiv' => 'refresh', :content => "15" }
+
+.loader.last 
+  %img.span_2{:src => '/images/loading.gif'}
+  %hr.space/
+  .span_11.push_4
+    %table#wait
+      - if @in_queue
+        %tr
+          %td.time unknown
+          %td.step Queued
+          %td.done [waiting]
+        - @messages.each do |msg|
+          - next if msg =~ /Metadocs/
+          %tr
+            %td.time= @times[msg]
+            %td.step= msg
+            %td.done 
+      - else
+        - @done.each do |msg|
+          %tr
+            %td.time= @times[msg]
+            %td.step= msg
+            %td.done [done]
+        %tr 
+          %td.time= @times[@current]
+          %td.step= @current
+          %td.done [in progress]
+        - @missing.each do |msg|
+          %tr
+            %td.time= @times[msg]
+            %td.step= msg
+            %td.done 
+
+
+

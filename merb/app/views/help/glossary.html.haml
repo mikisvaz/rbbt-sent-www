@@ -1,0 +1,140 @@
+#glossary
+  %dt#NMF
+    NMF
+  %dd
+    :redcloth
+
+      Non-negative Matrix Factorization (NMF) is a method used to find a low rank approximation to a
+      matrix using a set of factors, the number of which must be provided beforehand. The most
+      important characteristic of NMF is that both the factor matrix and the mixture matrix are both
+      non-negative, and usually sparse, which makes them more easily interpretable. The factors can
+      be though to capture "local" features in the data. Another important characteristic is that
+      most implementations of NMF are non-deterministic; different runs for the same matrix and the
+      same number of factors can render different factorizations.
+
+      In SENT the original matrix has one vector per gene, that hold a word vector representation of
+      the literature associated with that gene. The factorization renders factors that hold
+      combinations of words, and genes are represented by combinations of these factors. Because NMF
+      is non-deterministic, SENT uses multiple runs (10) to stabilize results, and uses the
+      Cophenetic Correlation Coefficient to evaluate how appropriate the factorization is.
+
+
+  %dt#CCC
+    Cophenetic Correlation Coefficient
+  %dd
+    :redcloth
+
+      These coefficients are estimated from the dendrogram used to group the results
+      from the 10 executions of NMF. High values on this coefficient indicate a high 
+      level of agreement across different executions, which indicates stability in the
+      results and, thus, an appropriate factorization, both in terms of the nature
+      of the data and in terms of the selection of the number of factors.
+
+
+
+  %dt#factor
+    Factor
+  %dd
+    :redcloth
+
+      A factor is each of the vectors that form the new bases in the NMF factorization, and can be
+      seen as a signal identified in the data. In SENT they are collections of words and they are
+      used to derive the semantic features.
+
+  %dt#semantic_feature
+    Semantic Feature
+  %dd
+    :redcloth
+    
+      The term Semantic Feature is introduced previously in the literature to refer to NMF factors,
+      honoring the interpretable nature provided by the non-negativity, sparseness and locality. In
+      SENT we do not use this term to refer to the factors themselves, but to a more elaborate
+      selection of terms that is derived from these factors. SENT runs 10 executions of NMF, instead
+      of just one, and, as a results, has 10 times the specified number of factors. These repeated
+      factors are clustered back together and averaged.  From these factor averages the semantic
+      feature are selected as the 15 words that rank the highest in the value for that factor group
+      divided by the average across the other factor groups. This scoring combines favoring strong
+      signals and specificity of the semantic features.
+    
+  %dt#stem
+    Stem
+  %dd
+    :redcloth
+    
+      Words that derive from the same word share a common stem, for instance 'mutation' and 'mutate'
+      share the stem 'mutat'. SENT uses stems instead of the original words to reduce the
+      dimensionality of the data space.
+
+  %dt#bigram
+    Bigram
+  %dd
+    :redcloth
+    
+      Two consecutive words have a meaning separate from their individual occurrences that
+      is important enough to be considered a feature in itself. SENT takes the bigrams as well as
+      the single words.  After TF-IDF only just a few of these bigrams remain.
+
+  %dt#TF_IDF
+    TF-IDF
+  %dd
+    :redcloth
+    
+      Term Frequency Inverse Document Frequency (TD-IDF) is a measure of usefulness  of a word
+      commonly used in text mining. It gives importance to words that are very frequent, while
+      penalizing them if they appear in too many documents. This measure favors words that appear
+      frequently in a small subset of documents, as these will be useful to discriminate these
+      documents.
+
+  %dt#fine_grained
+    Fine Grained Analysis
+  %dd
+    :redcloth
+      
+      In this type of analysis the TF-IDF values for the words are computed relative to just the
+      collection of articles related to the genes in the actual analysis, instead of the values
+      computed for the complete organism genome. This analysis may save terms that might otherwise
+      have been rendered useless in the context of the complete genome.  Computing these TF-IDF
+      values on-line *takes a considerable time*.
+ 
+  %dt#custom
+    Custom Analysis
+  %dd
+    :redcloth
+      
+      In this kind of analysis the entities analyzed need not be genes at all. The entities need to
+      be associated with PubMed articles using an association file. The format of the file is tab
+      separated with two columns, first column the name of an entity and the second is a PubMed id
+      or a coma separated list of ids. Associations for an entity might be specified across several
+      lines. The TF-IDF values are computed for each job, so, as with the fine grained, it *takes a
+      considerable time*.
+    
+  %dt#supported_ids
+    Supported IDS
+  %dd
+    :redcloth
+      
+      Each organisms supports a number of id formats to specify the genes. The fist in the list for
+      each organism is the id used internally by SENT, all the others are translated back to that
+      one. The examples bellow show ids for a random gene; not all genes have all the identifiers,
+      so some of the example ids are blank.
+
+    %table#ids
+      %thead
+        %tr
+          %th Id Format
+          %th Example
+      - @datasets.each do |org, info|
+        %thead
+          %tr
+            %th{:colspan => 2, :id => org} 
+              =info["Name"]
+        %tbody
+          - info["ID Format"].split(/, /).each do |format|
+            - name, example = format.match(/(.*)\((.*)\)/).values_at(1,2)
+            %tr
+              %td
+                = name
+              %td 
+                = example
+
+              

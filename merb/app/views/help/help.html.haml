@@ -1,0 +1,190 @@
+#help
+  :redcloth
+    
+    h2. Introduction
+
+    SENT is an exploratory tool that uses literature analysis to describe a list of genes.  The
+    description has the form of a set of "semantic features":help/glossary#semantic_feature, each
+    consisting of a list of words that suggest a biological concept. Each gene in the list has a
+    certain level of relation to each semantic feature, and thus, to each biological concept;
+    usually, if the factorization is appropriate, each gene may be identified with one, and only
+    one, semantic feature.
+    
+    The appropriateness of the factorization depends on the nature of the data, and, since the
+    number of factors to produce must be estimated a-priori, on how good this estimation is.  As we
+    will see later, there is an analytic measure of how appropriate a factorization is, called the
+    "Cophenetic Correlation Coefficients":help/glossary#CCC, that can help us determine the optimal
+    number of factors to produce, so that we can capture the biological concepts with more accuracy.
+
+    h4. _Methodology Overview_
+
+    The literature examined consists of the titles and abstracts of articles from PubMed that are
+    found to be related to each gene. The text from these titles and abstracts is converted to a
+    "bag of words":help/glossary#bag_of_words representation, the terms used in the bag of words are
+    the "stems":help/glossary#stem from the words and "bigrams":help/glossary#bigram. From the
+    whole collection of words and bigrams, only those with best expressiveness potential are
+    considered, the rest are eliminated from the analysis. The measure of expressiveness potential
+    is the "TF-IDF":help/glossary#TF_IDF. 
+
+    The process just described allows us to represent the genes  in a vector space model using the
+    bag of words derived from their literature. This vector representation is then processed using
+    "NMF(Non-negative Matrix Factorization)":help/glossary#NMF to summarize the data into
+    combinations of signals called "factors":help/glossary#factor. These factors, when the
+    factorization is appropriate, capture the main topics discussed in text analyzed, and are easily
+    interpretable.  The NMF processing is outsourced to the "BioNMF":http://bionmf.dacya.ucm.es "SOAP
+    Web Server":http://bionmf.dacya.ucm.es/webservices.html.
+
+    To improve the results of the methodology, the semantic features are not directly identified as
+    the factors of an NMF factorization. Instead, the factorization is run 10 times, and the
+    resulting factors are clustered and averaged. This serves both to stabilize the results, and to
+    offer a measure of appropriateness for the factorization, based on the "Cophenetic Correlation
+    Coefficients":help/glossary#CCC. It also enables us to produce the heatmap image, another
+    quality assessment tool, but visual. The semantic features are composed of the 15 words that are
+    most "important" for each of the "averaged" factors, where the importance is the weight of the
+    word in the factor divided with the mean of that weight across the other factors. This measure
+    favors a balance between signal strength and discriminative power.
+
+
+
+    h2(#use). Basic Usage
+
+    From the  "main page":/ select the organisms to which the genes belong to and paste the list of
+    genes in the text area. Optionally, you can specify a file with the genes, which will be used
+    instead of the text area. The identifiers may be specified in any of the supported formats, and
+    they will be translated into the internal standard format. The supported formats can be examined
+    in "supported id table":/help/glossary#supported_ids. If your genes are not in any of the
+    supported ids formats, but with some synonyms, or if some fail to translate, you may want to try
+    the "Translation tool":/translate.
+ 
+
+    The next step is to determine the number of factors. You may specify a list of values using
+    comma separated numbers or ranges, like '2-5, 7, 10'. Each value offers an analysis at a
+    different resolution. A value of 3 will form 3 groups. Each values in the list will be process
+    in increasing order and you may examine the results for the correspondent factorization as they
+    become available.  Once a batch of values have finished you will have the opportunity of
+    specifying new batch to be processed in the background. You will be able to explore the results 
+    for the different resolutions from the table under the 'Job Overview and Factorizations' section.
+
+   
+    By default jobs receive a random identifier, but you may otherwise suggest a name. If the name
+    is taken by a previous job a number will be appended. You may also specify an email that will be
+    used to notify when results become available.
+
+
+    There are two special types of analysis that can be performed. The "fine
+    grained":help/glossary#fine_grained and the "custom":help/glossary#custom: 
+
+    * +Fine grained+: 
+      Differs from the standard analysis in the terms used for the bag of words representation.  In
+      the normal analysis, the collection of terms considered for analysis is selected by a measure
+      of relevance (TF-IDF) established considering the articles associated to all genes in the
+      genome; while in the _fine grained_ analysis, the importance of the words is established
+      considering only the articles associated to the actual genes in the input list. The
+      consequence is that the _fine grained_ analysis produces semantic features with *terms more
+      specific to the actual genes in the list*, than the ones in the normal analysis. The drawback
+      of the _fine grained_ analysis is that the most costly computation, the generation of the gene
+      term vectors, must be redone each time, which makes the analysis considerably longer than the
+      standard analysis. However, once these computations have been performed all the
+      factorizations performed for any number of factors will reuse them, for that reason it is
+      advisable to use the re-factor feature instead of launching new jobs, specially in _fine
+      grained_ and _custom_ jobs.
+
+
+    * +Custom+: 
+      In this case the list of elements need not be genes for supported organisms, in fact, they
+      need not be genes at all. *Any kind of entity* may be analyzed as long as each instance is
+      associated with some PubMed articles. The entities and associated articles are specified using
+      a tab separated file. This type of analysis is performed selecting the @Custom Associations@
+      option in the organism select and uploading the associations file. As with the _fine grained_,
+      this type of analysis computes the importance of the terms each time, and thus, the same
+      considerations of computation time of the _fine grained_ analysis apply.
+
+    All the functionality is also available using the "SOAP Web Service":help/WebService, and any jobs
+    submitted that way can have their results examined using this web interface as if they where
+    launched here. This site, in fact, only serves as a front end for the Web Service. The only
+    particularity is that the Web Service only stores the result for the last factorization, and any
+    client of the Web Service must remember to save the results for each factorization as they are
+    launched; which is precisely what this web application does.
+
+    One additional functionality offered is the literature examination. For each job submitted, an
+    index is built containing the articles associated to the genes. This index can be used to
+    retrieve the associated articles most relevant to each semantic feature, by performing a query
+    to the index using the terms in the semantic feature. The index can be built at any time short
+    after the initial job is submitted, even before the NMF factorization of the @metadoc@ step of a
+    _custom_ of _fine grained_ analysis. The main page provides a way to schedule the index to be
+    computed, but it can also be computed at any time from the results page. Computing the index can
+    take a considerable time as well, users are advice, as with the _fine grained_ and _custom_
+    analysis, to reuse jobs using the re-factor tool instead of launching new ones, whenever
+    possible.  
+
+    When you examine the results you may find that some groups represents sparsely annotated genes
+    with articles relating to useless information like methodology  articles describing microscopy,
+    or spectrometry experiments. This often happens and you may want to remove those genes from the
+    list and redo the analysis. Also, some genes may be form big groups and may deserve their own
+    separate analysis job. For these reasons the first time you examine a set of genes it is advised
+    to use the recommended number of factors and not turn on the 'Fine grained analysis' and the
+    'Build literature index' options, since these are computationally expensive. Once you are sure
+    that the genes list is OK you may try those options.
+
+
+
+    h4. _Gene Name Translation_
+
+    We mention that the gene identifiers must be in one of the supported identifier formats. In some
+    cases it may happen that what the user has are not the genes identifiers, but the synonyms used
+    to refer to them on the literature. Since these synonyms are very often ambiguous or incomplete
+    they are not accepted directly as input. However, to aid in the process of translating these
+    synonyms to identifiers, the "translation":/translate tool tries to automatically find the
+    best matches. Select the organism, place the gene synonyms in the appropriate box and hit
+    submit.  Any synonyms that find a good enough match will appear in the identifiers box, while
+    those that do not, remain in the original box.
+
+
+    h2. Results
+
+    Each job receives a unique identifiers that is used to query the results, both through the web
+    server or through the web site interchangeably (except that, at the time been, the web server
+    only saves the latest factorization, the web site saves the results for each factorization). The
+    main results page shows a series of components:
+
+    h4. _Clustering HeatMap_
+
+    This image is used, along with the cophenetic correlation coefficient, to examine the stability
+    of the factorization. It shows 10 different factorization for a given number of factors; if, for
+    instance, 8 factors are selected, 10 executions of an 8 factor factorization will render 80
+    different factors. These factors are represented as columns in the heatmap image, and, if the
+    factorization is stable, they should cleanly cluster back into as many groups as the original
+    number of factors specified, roughly having 10 factors each. The rows of the image represent
+    genes, they are sorted so that genes that should be assigned to a particular factor group end up
+    together.  While the image shows a gene-factor matrix, the factors are actually clustered
+    together according to their word profiles in order to favor stabler word profiles for the
+    semantic features, which is preferred  over more stable grouping of genes.  Genes are assigned
+    to the group that, in average, contribute more to that gene's literature.
+
+    h4. _Job Overview and Factorizations_
+
+    Contains general information about the job: genes analyzed, range of factors examined and their
+    cophenetic correlation coefficients, and number of articles used in the analysis. It also
+    provides links to downloads several data matrices that compose the results for the factorization
+    been shown as would be retrieved from the Web Service.
+    
+    h4. _Groups_
+
+    These groups are formed from the factorization and include a list of words that compose a
+    semantic feature, as well as the genes that have that semantic features as their most
+    representative one.
+
+    h4. _Gene Details_
+
+    This page shows a GO term enrichment analysis, performed by
+    "GeneCoDis":http://genecodis.dacya.ucm.es, and details for a list of genes. There is a page like
+    this for each group and one for the complete job.
+
+    h4. _Literature Examination_ 
+
+    Each semantic features words may be used to query the list of articles associated for that group
+    to stablish a ranking of relevance. To do this the server must have first computed the
+    literature index. This is done once for every job and is maintained across factorizations. There is
+    a search tool that allows to perform custom queries to sort the list of articles. The default rankings
+    use the list of terms for the semantic feature as a query.
+

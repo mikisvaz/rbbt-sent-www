@@ -1,0 +1,245 @@
+-# Literature
+= partial :literature_header, :with => @job, :as => :job
+
+-# Range
+= partial :range_header, :with => @job, :as => :job
+
+
+
+-# Clustering 
+
+#contract_Clustering_Image_title.contract_title.prepend_1
+  %h2#tip_anchor_Clustering.tip
+    Clustering Image
+  #tip_Clustering.tooltip
+    %h3
+      Clustering
+    %p
+
+      The Clustering Heatmap image and the cophenetic correlation coefficient (CCC) can be used to
+      measure the quality of a factorization. A high CCC means stable factorization across multiple
+      executions. In the image, clear yellow blocks over dark red background also indicate a stable
+      factorization. You may redo the factorization with the same or a different number of factors
+      and it will be executed in the background. The results for different numbers of factors are
+      accessible under the "Job Overview and Factorizations" section.
+       
+  #contract_Clustering_Image_short.contract_short
+    %dl
+      %dt
+        Factors:
+      %dd= @job.factors
+      %dt
+        Cophenetic Correlation Coefficient
+      %dd
+        = @job.cophenetic
+
+#contract_Clustering_Image_long.contract_long.prepend_1
+  #hclust
+    %img.span_11{ :src => "/results/#{@job.name}.#{@job.factors}.hard.jpg" }/
+    - if !@job.missing? && Job.new(@job.name).done?
+      %p
+        %label{ :for => "refactor" } Number of Factors:
+        %input#refactor.refactor{ :name => "factors", :size => "10" }/
+        %a.refactor{ :href => "/ajax/refactor?name=#{@job.name}&factors=k" }
+          Refactor
+
+%script{ :type => "text/javascript" }
+  $("#contract_Clustering_Image_title").addClass('open');
+  $("#contract_Clustering_Image_short").toggle();
+%hr/
+
+
+-# #contract_Gene_Profiles_title.contract_title.prepend_1
+-#   %h2
+-#     Gene Profiles
+-#   #contract_Gene_Profiles_short.contract_short
+-#     %p
+-#       Click to view
+-# #contract_Gene_Profiles_long.contract_long.prepend_1
+-#   %table#profiles
+-#     %thead
+-# 
+-#       %tr 
+-#         %th Gene
+-#         -  @job.groups.length.times do |i|
+-#           %th= "Group #{ i + 1}"
+-#     %tbody
+-#       - @job.profiles.each do |gene, value|
+-#         = gene_profile(@job.genes_info[gene], value)
+-#  
+-# %script{ :type => "text/javascript" }
+-#   $("#contract_Gene_Profiles_long").toggle();
+-# %hr/
+-# 
+
+
+-# Job Overview
+#contract_Job_Overview_title.contract_title.prepend_1
+  %h2
+    Job Overview and Factorizations
+  #contract_Job_Overview_short.contract_short
+    %dl
+      %dt
+        Genes:
+      - if @job['custom']
+        %dd= @job.genes.length
+      - else
+        %dd= @job['translated'].length
+
+      %dt
+        Articles:
+      %dd= @job.articles.length
+
+      - if @job.single?
+        %dt
+          Number of factors
+        %dd
+          = @job[:factors]
+      - else
+        %dt
+          Factorizations:
+          %span.note (Expand to select a different one)
+        %dd
+          - @job.range.sort.each_with_index do |k,i|
+            - if k == @job.factors
+              %span.current= k
+            - else
+              =k
+            - if i != @job.range.length - 1
+              ,
+
+
+
+
+#contract_Job_Overview_long.contract_long.prepend_1
+  .group_nav
+    %span
+      %a{ :href => "/#{@job.complete_name}/0" }
+        Gene Details
+    %span
+      %a.literature{ :href => "/literature/#{@job.complete_name}/0/all" }
+        Literature Examination
+  %dl
+    %dt
+      Dataset:
+    %dd.org= @job[:org]
+    %dt
+      Genes:
+    %dd.genes= @job.genes_info.map{|gene, info| info[:name]}.join(', ')
+    - if @job.missing_genes.any?
+      %dt 
+        Genes not translated:
+      %dd
+        = @job.missing_genes.join(", ")
+    - if @job.rare_genes.any?
+      %dt 
+        Genes with no associated articles in the system:
+      %dd
+        = @job.genes_info.values_at(*@job.rare_genes).map{|info| info[:name]}.join(', ')
+
+    %dt
+      Factorizations:
+    - if @job.single?
+      %dd= @job[:factors]
+    - else
+      %dd 
+        - values = @job.range.sort
+        %table#cophenetic.span_7
+          %thead
+            %tr
+              %th Num Factors
+              %th Cophenetic Correlation
+          %tbody
+            - ccc = @job.cophenetics
+            - values.each do |k|
+              %tr
+                -if ccc[k]
+                  %td 
+                    %a.use{:href => "/#{ @job.name }=#{ k }" }= k
+                  - if ccc[k] == 0
+                    %td error!
+                  - elsif ccc[k].to_f ==  ccc.values.max
+                    %td.best= ccc[k].to_f
+                  - else
+                    %td= ccc[k].to_f
+                -elsif @job.failed.include? k
+                  %td= k
+                  %td 
+                    "Error!"
+                    %a.refactor{:href => "/ajax/refactor/?name=#{@job.name}&factors=#{k}"} retry
+                -else
+                  %td= k
+                  %td "Not computed yet"
+
+    %dt
+      Download Data. 
+      %span.note
+        (The genes may have been 
+        %a{ :href => "/results/#{@job.name}.#{@job.factors}.translations" }
+          translated 
+        to the internal standard id format)
+    %dd
+      %a{ :href => "/results/#{@job.name}.#{@job.factors}.summary" }
+        Summary (in YAML)
+      ,
+      %a{ :href => "/results/#{@job.name}.#{@job.factors}.features", :type => "text/tab-separated-values" }
+        Complete Group-Term Weights
+      ,
+      %a{ :href => "/results/#{@job.name}.#{@job.factors}.profiles", :type => "text/tab-separated-values" }
+        Complete Gene Profiles
+      ,
+      %a{ :href => "/results/#{@job.name}.#{@job.factors}.merged.features", :type => "text/tab-separated-values" }
+        Merged Group-Term Weights
+      ,
+      %a{ :href => "/results/#{@job.name}.#{@job.factors}.merged.profiles", :type => "text/tab-separated-values" }
+        Merged Gene Profiles
+
+%script{ :type => "text/javascript" }
+  $("#contract_Job_Overview_long").toggle();
+
+
+-# Groups
+- @job.groups.each do |g|
+  %hr/
+
+  .contract_title.prepend_1{:id => "contract_Group_#{g.number}_title"}
+    %h2
+      == Group #{g.number}
+    .contract_short{:id => "contract_Group_#{g.number}_short"}
+      %dl
+        %dt Words:
+        %dd= g.words.join(", ")
+        %dt== Genes: #{g.genes.length}
+        %dd= g.genes_info.collect{|id,info| info[:name]}.join(", ")
+        %dt Articles:
+        %dd= g.articles.length
+  .contract_long.prepend_1{:id => "contract_Group_#{g.number}_long"}
+    .group_nav
+      %span
+        %a{ :href => "/#{@job.complete_name}/#{g.number}" }
+          Gene Details
+      %span
+        %a.literature{ :href => "/literature/#{@job.complete_name}/#{g.number}/all" }
+          Literature Examination
+ 
+    - # Words
+    %h3.tip{:id => "tip_anchor_Words_#{g.number}"}
+      Words:
+    .tooltip{:id => "tip_Words_#{g.number}"}
+      %h3
+        Words
+      %p
+        Each term represents a word stem, or the stems of the two words
+        that constitute a bi-gram term. Following are the actual words that
+        where found to produce each of the stems.
+
+    = partial :words_list, :with => {:words => g.words, :stems => g.stems}, :as => :info
+    
+    - # Genes
+    %h3 
+      Genes
+    = partial :genes_list, :with =>  g.genes_info, :as => :genes_info
+ 
+  :javascript
+    $("#contract_Group_#{g.number}_long").toggle();
+

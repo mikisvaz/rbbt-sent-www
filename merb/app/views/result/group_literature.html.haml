@@ -1,0 +1,35 @@
+#job_menu
+  %ul.menu
+    %li
+      %a{ :href => "/#{@group.job.complete_name}" }
+        [Job]
+    %li
+      %a{ :href => "/#{@group.job.complete_name}/#{@group.number}" }
+        [Gene Details]
+%hr
+%dl
+  %dt
+    Group:
+  %dd
+    = @group.number
+  %dt
+    Genes:
+  %dd
+    = partial :genes_list, :with => @group.genes_info, :as => :genes_info
+  %dt
+    Articles:
+  %dd
+    = @group.articles.length
+  %dt
+    Words:
+  %dd
+    = @group.words.join(", ")
+  %dt 
+    Search: 
+  %dd
+    %input.search{ :name => "words", :size => "50" }/
+    %a.search{ :href => "" }
+      Search
+%hr
+
+= partial :literature_table, :with => {:ranks => @ranks ,:associations => @group.associations , :words => @group.words , :stems => @group.stems, :gene_info => @group.genes_info}, :as => :info

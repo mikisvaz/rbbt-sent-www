@@ -1,0 +1,12 @@
+%ul.genes
+  - genes_info.each do |gene,info|
+    %li
+      %span.gene= info[:name] + ":" 
+      %span.synonyms= info[:synonyms].join(", ")
+      - if info[:url]
+        %span.info
+          %a{:href => info[:url]} info
+      - if info[:literature]
+        %span.info
+          %a{:href => info[:literature]} literature
+

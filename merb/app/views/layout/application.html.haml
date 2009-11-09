@@ -1,0 +1,50 @@
+!!!
+%html
+  %head
+    %meta{ 'http-equiv' => 'Content-Type', :content => 'text/html;charset=utf-8' }
+    %title= @title
+
+    %link{ :rel => "stylesheet" , :href => "/stylesheets/screen.css" , :type => "text/css" , :media => "screen , projection" }
+    %link{ :rel => "stylesheet" , :href => "/stylesheets/print.css"  , :type => "text/css" , :media => "print"}
+    <!--[if IE]><link rel="stylesheet" href="/stylesheets/ie.css" type="text/css" media="screen, projection"><![endif]-->
+    %link{ :rel => "stylesheet" , :href => "/stylesheets/sent.css" , :type => "text/css" }
+    %link{ :rel => "stylesheet" , :href => "/stylesheets/jquery.tablesorter.css" , :type => "text/css" }
+
+    = js_include_tag 'jquery', 'jquery.dimensions','jquery.tablesorter', 'jquery.timers', 'sent' 
+    %link{ :rel => "shortcut icon", :href => "/images/favicon.ico"}
+              
+
+  %body
+    #content
+      #header.span_19.clear.last
+        %img{:src => '/images/topSent.jpg'}
+
+      #main
+
+        #top_menu
+          %ul.menu
+            %li 
+              %a{:href => '/'} [Main]
+            %li 
+              %a{:href => '/translate'} [Translate]
+            %li 
+              %a{:href => '/help'} [Help]
+            %li 
+              %a{:href => '/help/WebService'} [Web Service]
+            %li#new_user 
+              %a{:href => '/help/guide'} [Quick Start Guide!]
+
+        #head_title
+          %h3= @head_title
+
+        %hr
+
+        = catch_content :for_layout
+
+
+      %hr
+      #footer.span_19
+        %span  
+          Please submit suggestions, comments and bug reports to 
+          %img#mvfdi.inline{:src => '/images/email.gif'}
+-#    = partial 'layout/google_analytics'

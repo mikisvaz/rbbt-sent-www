@@ -1,0 +1,68 @@
+:javascript
+  var job = '#{job.name}';
+
+- all = job.range
+- missing = job.missing
+- if job.in_process || job.missing?
+  #range
+    %span.processing
+      == Computing for k = 
+      %span.current= job.in_process || job.missing.first
+      \. Status: 
+      %span.status== [#{job.real_status.sub(/done/,'queued')}]
+      \.
+  %hr
+
+:javascript
+
+  function update_cophenetics(){
+    $.ajax({
+     url : '/ajax/cophenetics?name=' + job,
+     success: function(info){ 
+       data = eval('(' + info + ')');
+       $('table#cophenetic > tbody > tr').each(function(){
+         var val;
+         if ($(this).find('td:nth-child(1) > a').length > 0){
+           val = parseInt($(this).find('td:nth-child(1) >a').html());
+         }else{
+           val = parseInt($(this).find('td:nth-child(1)').html());
+         }
+
+         if (data[val] === undefined){
+           return true;
+         }
+
+         $(this).find('td:nth-child(1)').html("<a class=\"use\" href=\"/" + job + "=" + val + "\">" + val + "</a>")
+         $(this).find('td:nth-child(2)').html(data[val])
+
+       })
+     }
+      
+   })
+  }
+
+  $('div#range > span.processing').everyTime('20s', 'controlled', 
+   function() { 
+     var last = parseInt($('span.current').html());
+     $.ajax({
+       url : '/ajax/done_range?name=' + job,
+       success: function(html){ 
+         if (html == 'true'){ 
+           $(this).stopTime('controlled');
+           $(this).remove();
+           window.location.reload(); 
+         } 
+         else{ 
+           data = eval('(' + html + ')');
+
+           $('span.current').html(data['current']);
+           $('span.status').html('[' + data['status'] + ']');
+
+           if (parseInt(data['current']) != last){
+             update_cophenetics();
+           }
+         }
+       }
+     })
+   })
+

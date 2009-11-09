@@ -1,0 +1,27 @@
+- if !job.info[:literature_done] 
+  #literature
+    - if job.literature_job
+      %span.processing Processing Literature Index
+    
+    - else
+      %a{ :href => "/ajax/literature?name=#{@job.name}" }
+        %span#tip_anchor_Literature.tip
+          == Build Literature Index (#{ 2 + @job.articles.length / 1000} min)
+          \ 
+
+      #tip_Literature.tooltip
+        %h3
+          Literature Index
+        %hr.space/
+        %p
+          Building the literature index will enable the literature examination, which
+          presents the articles used in the analysis sorted according to the relevance to each 
+          particular semantic feature.
+
+
+      
+
+  %hr
+
+
+

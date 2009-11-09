@@ -1,0 +1,327 @@
+%form{ :enctype => "multipart/form-data", :action => "/", :method => "post" }
+
+  .column.span_8.colborder
+    -#-------------------------------------------------------------------------
+    #dataset.span_8.last
+      %h3#tip_anchor_Dataset.tip
+        1. Dataset 
+      %select{ :name => "org" }
+        - @datasets.each do |p|
+          %option{:id => p[0], :value => p[0]}= p[1]['Name']
+        %option#custom{ :value => "custom" }
+          Custom Associations
+      %hr.space/        
+      
+      %p#description.vpad_4
+        %span.title
+          Description:
+        %span.text
+      %p#associations.vpad_4.hide
+        %label#tip_anchor_Associations.tip{ :for => "input_associations" }
+          Associations File
+        %input#input_associations{ :name => "associations", :size => "20", :accept => "text/plain", :type => "file" }/
+
+
+    %hr/
+    -#-------------------------------------------------------------------------
+
+    #factors.span_8
+      %h3#tip_anchor_Factors.tip
+        3. Factors
+      %p
+        %label{ :for => "input_factors" } Number of Factors:
+        %input#input_factors{ :name => "factors"}/
+        %p#factor_suggestion.vpad_4
+          %span.title
+            Suggestion:
+          %span.text
+  
+    %hr/
+    -#-------------------------------------------------------------------------
+
+    #optional.span_8
+      %h3
+        4. Optional
+
+      %p
+        %input#literature_input{ :name => "literature", :type => "checkbox" }/
+        %label#tip_anchor_Literature.tip{ :for => "literature_input" }
+          Build Literature Index
+        %br/
+        
+        %input#finegrained_input{ :name => "fine_grained", :type => "checkbox" }/
+        %label#tip_anchor_Fine.tip{ :for => "finegrained_input" }
+          Fine grain analysis
+      %p
+        %input#name_input{ :name => "name" }/
+        %label{ :for => "name_input" }
+          Job Name
+      %p
+        %input#email_input{ :name => "email" }/
+        %label{ :for => "email_input" }
+          Email
+ 
+  .column.last.span_9
+    -#-------------------------------------------------------------------------
+
+    #genes
+      %h3#tip_anchor_Genes.tip
+        2. Genes
+      %p 
+        See the
+        %a#supported{:href => '#'} Supported Ids. 
+        Or
+        %a{ :href => "/translate/" } Translate
+        your gene synonyms.
+        %textarea#ids{ :name => "ids" }
+
+      %label#tip_anchor_File.tip{ :for => "file" }
+        File with gene ids
+      %input#file.file{ :name => "file", :size => "15", :accept => "text/plain", :type => "file" }/
+
+      %hr.space
+    %hr
+    -#-------------------------------------------------------------------------
+
+    #examples
+      %h3
+        Precomputed Examples:
+      %dl
+        %dt
+          Homo sapiens:
+        %dd
+          %a{:href => "Example_Human=5"} Standard
+          or
+          %a{:href => "Example_Human_fine=5"} Fine Grained
+          \.
+          %a#example_human.example{ :href => "/examples/human.txt" } Load data
+
+        %dt
+          Saccharomyces cerevisiae:
+        %dd
+          %a{:href => "Example_Yeast=3"} Standard
+          or
+          %a{:href => "Example_Yeast_fine=4"} Fine Grained
+          \.
+          %a#example_sgd.example{ :href => "/examples/saccharomyces.txt" } Load data
+          
+
+  %hr
+  -#-------------------------------------------------------------------------
+
+  #submit.span_5.push_7
+    %input{ :type => "submit" }/
+
+-# Tips
+
+#tip_Fine.tooltip
+  %h3
+    Fine grain analysis
+  %hr.space/
+  %p  
+
+    This analysis renders results with more specific terms than the
+    standard analysis but takes considerably longer, around 15 or 30
+    minutes. 
+
+
+#tip_Factors.tooltip
+  %h3
+    Number of Factors.
+  %hr.space/
+  %p
+
+    Select the number of factors to produce. 
+
+  %p
+    You may specify a coma
+    separated list of values to explore, ranges are also allowed.  There
+    must be a maximum of 8 different values, between 2 and 32. Example: 2-5,
+    10, 15. Results for each value will be showed as they are made available.
+
+
+
+
+#tip_Genes.tooltip
+  %h3
+    Gene Ids
+  %hr.space/
+  %p
+
+    Paste the gene ids. 
+
+  %p
+    They must be in one of the acceptable formats listed in the Supported
+    Ids table. If gene names are available instead of gene identifiers, try the Translation
+    tool. Ids may be separated by comas or line breaks. If a file is specified it must follow
+    this same format, and it will be used instead of the contents of the text area. 
+
+  %p.note
+    NOTE: Some ids may not be recognice, or may refer to genes with no associated articles in the system
+
+
+#tip_File.tooltip
+  %h3
+    File with gene ids
+  %hr.space/
+  %p
+
+    You may specify the gene ids by uploading a file instead of using the text area. If a file is specified the ids in the 
+    text area will be ignored
+ 
+#tip_Literature.tooltip
+  %h3
+    Literature Index
+  %hr.space/
+  %p
+
+    Building the literature index will enable the literature examination, which
+    presents the articles used in the analysis sorted according to the relevance to each 
+    particular semantic feature.
+
+
+#tip_Dataset.tooltip
+  %h3
+    Dataset Selection
+  %hr.space/
+  %p
+    Select the organism the genes belong to. 
+  %p  
+
+    If 'Custom Associations' is selected, you will be asked to provide a
+    text file with the associations. One association per line, listing the
+    entity and a coma separated list of PubMed ids, separated by a tab
+    character. There associations for a particular entity may also be
+    spread out across different lines.
+ 
+#tip_Associations.tooltip
+  %h3
+    Associations File
+  %hr.space/
+  %p  
+
+    Provide a text file with the associations. 
+  %p  
+    One association per line, listing the
+    entity and a coma separated list of PubMed ids, separated by a tab character. There
+    associations for a particular entity may also be spread out across different lines.
+
+
+:javascript
+  
+  function update_select_dataset(){
+    value = $('#dataset select').val();
+    switch (value){
+    case '':
+    case null:
+    case undefined:
+      break;
+    case 'custom':
+      $('#description').hide();
+      $('#associations').show();
+      $('textarea#ids').attr("disabled", true);
+      $('input#file').attr("disabled", true);
+      $('input#finegrained_input').attr("disabled", true);
+      break;
+    default:
+      $('textarea#ids').attr("disabled", false);
+      $('input#file').attr("disabled", false);
+      $('input#finegrained_input').attr("disabled", false);
+      $('#description').show();
+      $('#associations').hide();
+      $('a#supported').attr('href','/help/glossary#' + value);
+      $('#description span.text').load('/ajax/dataset_description?ORG=' + value);
+    }
+  }
+
+  $('#dataset select').change(
+    function(){
+     update_select_dataset();
+    })
+  update_select_dataset();
+
+
+
+  function nonEmptyLines(str){
+    try {
+      return((str.match(/[^\s,]+/g).length));
+    } catch(e) {
+      return 0;
+    }
+  }
+
+     /* Num factor sugestion */
+  $('#ids').change(function(){
+    var lines = nonEmptyLines($(this).val());
+    $('p#factor_suggestion span.text').html('')
+    if (lines == 0) return;
+    var msg = 'You have selected ' + lines + ' genes. We suggest to start with trying \'';
+
+    if (lines <= 3){
+      $('p#factor_suggestion span.text').html('You have selected too few genes to run an analysis.'); 
+      return;
+    }
+    else if (lines <= 5){
+      msg += '2-3';
+    }
+    else if (lines <= 10){
+      msg += '2-4';
+    }
+    else if (lines <= 25){
+      msg += '2-4, 7';
+    }
+    else if (lines <= 50){
+      msg += '2-5, 7, 10';
+    }
+    else if (lines <= 100){
+      msg += '2-5, 10, 15';
+    }
+    else if (lines <= 500){
+      msg += '2-5, 10, 20';
+    }
+    else{ 
+      msg += '2-5, 10, 20, 32';
+    }
+
+   msg += '\' factors.'
+
+    $('p#factor_suggestion span.text').html(msg)
+  })
+
+
+     /* Init data */
+  if (window.navigator.sent_org){
+    $('#dataset select').val(window.navigator.sent_org);
+    window.navigator.sent_org = null;
+  }
+  if (window.navigator.sent_genes){
+    $('textarea#ids').val(window.navigator.sent_genes);
+    window.navigator.sent_genes = null;
+  }
+  if (window.navigator.sent_factors){
+    $('input#input_factors').val(window.navigator.sent_factors);
+    window.navigator.sent_factors = null;
+  }
+
+     /* Example ids */
+  $('a.example').click(
+    function(){
+      org = $(this).attr('id').replace(/example_/,'');
+      $.ajax( {
+        url: $(this).attr('href'),
+        success : function(html){
+         $('textarea#ids').attr('value',html).change();
+         update_select_dataset();
+         var range = $('p#factor_suggestion span.text').html().match(/'(.*)'/)[1]
+         $('input#input_factors').val(range);
+        }
+      });
+
+      $('#dataset select').val(org);
+      return(false);
+    })
+  $('textarea#ids').change();
+
+ 
+
+

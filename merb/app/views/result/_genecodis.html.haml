@@ -1,0 +1,34 @@
+- goterms = info[:goterms]
+- genes_info = info[:genes_info]
+%table#genecodis
+  %tbody
+    %tr
+      %th.span_5
+        Genes
+      %th.span_2
+        Support
+      %th.span_2
+        Total S.
+      %th.span_1
+        P-Value
+      %th.span_8.last
+        GO Terms
+    - goterms.each do |term|
+      %tr 
+        %td 
+          - links = term[:genes].collect do |gene| 
+            - gene_info = genes_info[gene] 
+            - capture_haml(gene_info) do |gene_info|
+              %a{ :title => gene_info[:synonyms].join(", "), :href => gene_info[:url] || "#"} 
+                = gene_info[:name] 
+          = links.join(", ") 
+
+        %td.support=        term[:support]
+        %td.total_support=  term[:total_support]
+        %td.pvalue=         "%1.4g" % term[:pvalue]
+        %td 
+          %ul.goterms 
+            - term[:go_terms].sort.each do |goterm|
+              %li= go_info(goterm)
+              
+

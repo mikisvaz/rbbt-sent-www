@@ -1,0 +1,30 @@
+%form{ :enctype => "multipart/form-data", :action => "/translate/", :method => "post" }
+  #select
+    %h3
+      Dataset
+    %select#dataset{ :name => "org" }
+      - @datasets.each do |p|
+        %option{:id => p[0], :value => p[0], :selected => (p[0] == @org) }= p[1]['Name']
+  %hr.space
+  .container
+    #input.span_10
+      %h3#tip_anchor_Normalize.tip
+        Gene Names (Input)
+      #tip_Normalize.tooltip
+        %h3
+          Translation Tool
+        %hr.space/
+        %p
+
+          Paste the gene names, one per line, on the input box, select the right
+          organism, and hit "Submit". Genes that are matched will appear on the 
+          output box, genes that where not matched, or that where too ambiguous,
+          will remain in the input box, and must be normalized manually.
+
+
+      %textarea#input_genes.span_8{ :name => "genes" }=@missing.join("\n")
+    #output.span_10.last
+      %h3
+        Gene Identifiers (Output)
+      %textarea#output_genes.span_8{ :name => "ids" }=@found.join("\n")
+  %input#submit{ :name => "submit", :type => "submit" }

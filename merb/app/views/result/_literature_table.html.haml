@@ -1,0 +1,39 @@
+- ranks = info[:ranks]
+- associations = info[:associations] || {}
+- words = info[:words] || []
+- stems = info[:stems] || []
+- gene_info = info[:gene_info] || []
+
+%div
+  - if ranks.any?
+    = pager(@pages, @page, 'literature', @query)
+    %table#literature.tablesorter
+      %thead
+        %tr
+          %th.span_1.header
+            PMID
+          %th.span_5.header
+            Title
+  
+          - if ranks.first[1].kind_of? Array
+            - ranks.first[1].length.times do |i|
+              %th.span_1
+                = "Group #{i + 1}"
+          - else
+            %th.span_1 
+              Score
+  
+          - if associations.keys.any?
+            %th.span_2.header
+              Genes
+  
+      - pmids = ranks.collect{|p| p[0]}
+      - all_genes = associations.keys.select{|gene| (associations[gene]& pmids).any?} if associations
+      %tbody
+        - ranks.each do |p|
+          - pmid = p[0]
+          - value = p[1]
+          - next unless value
+          = literature_entry(pmid, value, associations ,all_genes, gene_info, words, stems)
+  -else
+    No Articles found

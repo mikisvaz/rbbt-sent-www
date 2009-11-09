@@ -1,0 +1,367 @@
+#ws
+  :redcloth
+
+    h2. Introduction
+
+    The SOAP Web Server takes care of making the actual analysis, while this web site only helps in
+    presenting the results. Under the covers, the web site makes calls to the web server. What this
+    means is that jobs launched via the web site are directly over the web server, and can have
+    their results queries interchangeably via the web site or the web server. Jobs launched via the
+    web server can also be inspected via de web site, which provides the opportunity to schedule a
+    batch of jobs during the night, and  analyze them the next day using the web site.  The web
+    server is implemented using SOAP, and the WSDL(Web Service Definition Language) file can be
+    found here "SentWS.wsdl":/wsdl/SentWS.wsdl
+
+    The web server works asynchronously, it provides a set of methods that initiate analysis job,
+    and methods that can be used to query the progress of these jobs and to gather the results upon
+    ending. Several jobs can be issued in parallel, and an overload of jobs will be dealt with with
+    the use of a queue. Depending on the characteristics of the job, it can last from a couple of
+    minutes to half an hour (for _fine grained_ and _custom_ analysis). Each job is identified with
+    a unique job identifier, that is created when the job is started, and that is used to further
+    query that job's status and results.  Additionally there are a few methods that query general
+    characteristics of the server, such as the organisms datasets supported. Following is a full
+    description of the methods.
+
+    To create a client driver in "Ruby":http://www.ruby-lang.org/ you can use the following code:
+
+    <code>
+    require 'soap/wsdlDriver';
+    wsdl_url = "http://sent.dacya.ucm.es/wsdl/SentWS.wsdl";
+    driver = SOAP::WSDLDriverFactory.new(wsdl_url).create_rpc_driver;
+    </code>
+
+    An example script can be found at "sent.rb":/examples/sent.rb.  En example execution is:
+
+    @ruby sent.rb --org human --genes human.txt --factors 3@
+
+    Where @human.txt@ could be the file "human.txt":/examples/human.txt
+
+  %table#ws.span_18
+    %thead
+      %tr
+        %th.header{:colspan => 4} Analysis 
+    %thead
+      %tr
+        %th Method
+        %th.span_4 Arguments
+        %th Returns
+        %th Description
+    %tbody
+      %tr
+        %td.method analyze
+        %td.parameters 
+          %ul
+            %li Dataset
+            %li List of genes
+            %li Number of factors
+            %li Suggested name
+        %td Job id
+        %td 
+          :redcloth 
+            Performs an standard analysis. @Suggested name@
+            is a suggestion for the name of the job. If the
+            name is already taken, a consecutive number is appended.
+            If the suggested name is the empty string, a
+            completely random name will be returned. The
+            @dataset@ is one of the identifiers returned by the
+            @dataset@ method described below.
+  
+      %tr
+        %td.method fine_grained
+        %td.parameters 
+          %ul
+            %li Dataset
+            %li List of genes
+            %li Number of factors
+            %li Suggested name
+        %td Job id
+        %td 
+          As before, but the word importance weights
+          are computed in-situ. This analysis takes
+          more time and renders more detailed results.
+              
+      %tr
+        %td.method custom
+        %td.parameters 
+          %ul
+            %li Associations
+            %li Number of factors
+            %li Suggested name
+        %td Job id
+        %td 
+          :redcloth 
+            The @associations@ parameter is a string containing
+            the contents of the association file as described in
+            the help.
+ 
+    %thead
+      %tr
+        %th.header{:colspan => 4} Job Query 
+    %thead
+      %tr
+        %th Method
+        %th.span_4 Arguments
+        %th Returns
+        %th Description
+     
+      %tr
+        %td.method status
+        %td.parameters 
+          %ul
+            %li Job id
+        %td Status string
+        %td 
+          :redcloth
+
+            Returns a string with the status of the job. The possible values
+            are in order: @queued@, @prepared@, @metadocs@, @matrix@, @nmf@,
+            @analysis@ and @done@.  Additionally there is @error@ and
+            @aborted@.  The @metadocs@ step is where the word weights are
+            recomputed and is skipped in standard analysis. If the job is been
+            re-factored or re-clustered, with the method described bellow the
+            status will be set to @refactor@ and @recluster@ accordingly during
+            the duration of that job.
+ 
+      %tr
+        %td.method messages
+        %td.parameters 
+          %ul
+            %li Job id
+        %td Array of message strings
+        %td 
+
+          These are messages generated by the analysis. They are usually
+          verbose descriptions of the status states they go through, but in the
+          case of error and aborted, they can hold information about the nature of
+          the error.
+
+      %tr
+        %td.method abort
+        %td.parameters 
+          %ul
+            %li Job id
+        %td Nothing
+        %td 
+          Aborts the execution of an analysis job.
+
+      %tr
+        %td.method done, error, aborted
+        %td.parameters 
+          %ul
+            %li Job id
+        %td Boolean: true or false
+        %td 
+
+          Checks if the job is in that particular state. Done actually means
+          been in the state of @done@, @error@, or @aborted@ rather than just in the
+          state @done@.
+
+      %tr
+        %td.method info
+        %td.parameters 
+          %ul
+            %li Job id
+        %td YAML structure with information about the job
+        %td 
+          :redcloth
+
+            This method returns a hash with information like the genes used in
+            the analysis, and the how the translated to the native identifier
+            format, the number of factors used, whether there is a job
+            computing the literature index or if the job is @fine_grained@ or
+            @custom@.
+
+      %tr
+        %td.method stems
+        %td.parameters 
+          %ul
+            %li Job id
+        %td Content of the stem file
+        %td 
+
+          The stem file is a tab separated file that lists each of the stems and a coma separated
+          list with the words that have been found produce that stem.
+
+      %tr
+        %td.method associations
+        %td.parameters 
+          %ul
+            %li Job id
+        %td Content of the associations file
+        %td 
+          The association file lists all the associations between genes and PubMed ids. Also tab separated as before.
+          The associations may be spread across several lines.
+          
+
+      %tr
+        %td.method search_literature
+        %td.parameters 
+          %ul
+            %li Job id
+            %li Word list
+        %td Contents of a tab separated list. One PubMed id per line followed by the score for the query
+        %td 
+
+          Makes a query in the literature index of the job with the provided links and returns an
+          list with value pairs containing the PubMed id and the score. The literature index must
+          have been computed already with the literature method described bellow.
+
+
+      %tr
+        %td.method results
+        %td.parameters 
+          %ul
+            %li Job id
+        %td Array of result ids
+        %td 
+
+          Returns an array of result identifiers that can then be used to retrieve the content of
+          the actual result files. The ids correspond the to following files:
+
+          %dl
+            %dt summary
+            %dd YAML format file containing the semantic features and associated genes
+            %dt cophenetic
+            %dd Cophenetic correlation coefficient for this factorization
+            %dt merged.profiles
+            %dd Gene profiles for each of the averaged factor groups
+            %dt merged.features
+            %dd Word profiles for each of the averaged factor groups
+            %dt heatmap.jpg
+            %dd Heatmap image with factors clustered by words and genes by gene profiles
+            %dt heatmap.hard.jpg
+            %dd Heatmap image with factors clustered by words and genes by factor gourp assignments
+            %dt profiles
+            %dd Gene profiles for each of all the factors from 10 executions
+            %dt features
+            %dd Word profiles for each of all the factors from 10 executions
+ 
+
+      %tr
+        %td.method result
+        %td.parameters 
+          %ul
+            %li Result id
+        %td String with the content of the file
+        %td 
+          :redcloth
+            The content of the file that the id represents. Note that
+            images are returned in @Base64@ encoding.
+    %thead
+      %tr
+        %th.header{:colspan => 4} Job Extension 
+    %thead
+      %tr
+        %th Method
+        %th.span_3 Arguments
+        %th Returns
+        %th Description
+ 
+      %tr
+        %td.method recluster
+        %td.parameters 
+          %ul
+            %li Analysis job id
+            %li Number of clusters
+            %li Suggested name
+        %td Job id
+        %td 
+
+          Takes the job denoted by the analysis job id and redoes the final part of the analysis
+          making a different number of clusters. By default the analysis takes the 10 executions of
+          the factorization and makes as many clusters as factors, with roughly 10 factors each. The
+          analysis is assigned a new job id, but the original analysis job status will reflect the
+          state of the analysis as well. The results of the new re-clustering will be be accessible
+          from the original job id. This step is done in a considerably shorter time compared to
+          redoing the complete analysis.
+
+ 
+      %tr
+        %td.method refactor
+        %td.parameters 
+          %ul
+            %li Analysis job id
+            %li Number of factors
+            %li Suggested name
+        %td Job id
+        %td 
+          :redcloth
+
+            As before, but redoes the analysis from the factorization step. Not only from the
+            clustering step. This method is specially helpful to save time with @fine_grained@ and
+            @custom@ analysis, as they reuse the word weights that take long to compute.
+
+      %tr
+        %td.method build_index
+        %td.parameters 
+          %ul
+            %li Analysis job id
+            %li Suggested name
+        %td Job id
+        %td 
+          :redcloth
+
+            Builds a literature index with the jobs associated literature that
+            can be used in the @search_literature@ method above. 
+
+      %tr
+        %td.method reset
+        %td.parameters 
+          %ul
+            %li Analysis job id
+        %td Nothing
+        %td 
+          :redcloth
+
+            If an extension job, like @recluster@ or @refactor@ fails, this method resets the
+            status of the original job so that new extension jobs can be issued.
+
+      %tr
+        %td.method clear_index
+        %td.parameters 
+          %ul
+            %li Analysis job id
+        %td Nothing
+        %td 
+          :redcloth
+
+            Resets all the literature index information of the job, including erasing the index. This is
+            helpful if the @build_index@ job fails.
+
+
+    %thead
+      %tr
+        %th.header{:colspan => 4} Other 
+    %thead
+      %tr
+        %th Method
+        %th.span_4 Arguments
+        %th Returns
+        %th Description
+ 
+      %tr
+        %td.method datasets
+        %td.parameters 
+          None
+        %td Array of identifiers strings for datasets
+        %td 
+          :redcloth
+            Returns the identifiers for the datasets supported by the server.
+            These are the ones that must be specified in the @analysis@ and @fine_grained@
+            methods.
+
+
+ 
+      %tr
+        %td.method description
+        %td.parameters
+          %ul
+            %li Dataset
+          
+        %td YAML hash with description information for the dataset
+        %td 
+          This information includes the organism, number of genes and articles
+          considered, and the supported format of the ids.
+
+
+

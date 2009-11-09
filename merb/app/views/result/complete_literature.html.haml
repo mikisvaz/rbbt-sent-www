@@ -1,0 +1,31 @@
+#job_menu
+  %ul.menu
+    %li
+      %a{ :href => "/#{@job.complete_name}" }
+        [Job]
+
+- @job.groups.each do |g|
+  %hr/
+  %h4
+    = "Group #{g.number}"
+    %a{:href => "/literature/#{@job.complete_name}/#{g.number}/all"} detailed
+  %dl 
+    %dt 
+      Words:
+    %dd
+      = g.words.join(", ")
+    %dt 
+      Genes:
+    %dd
+      = g.genes_info.collect{|g,info| info[:name]}.join(", ")
+
+%hr/
+
+%dl
+  %dt
+    Articles:
+  %dd
+    = @job.articles.length
+
+= partial :literature_table, :with => {:ranks => @ranks }, :as => :info
+

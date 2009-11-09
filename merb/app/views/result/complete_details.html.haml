@@ -1,0 +1,52 @@
+#job_menu
+  %ul.menu
+    %li
+      %a{ :href => "/" + @job.complete_name }
+        [Job]
+
+-# Literature
+= partial :literature_header, :with => @job, :as => :job
+
+
+.group_nav
+  %span
+    %a.literature{ :href => "/literature/#{@job.complete_name}/0/all" }
+      Literature Examination
+
+-# Genecodis
+- if !@job[:custom]
+  %hr
+  #contract_Genecodis_Enrichment_title.contract_title.prepend_1.open
+    %h2
+      Genecodis Enrichment
+    #contract_Genecodis_Enrichment_short.contract_short.hide{ :style => "display: none;" }
+      %span.title
+        Go Terms Enriched
+      %span.description
+        = @job.goterms.length
+  #contract_Genecodis_Enrichment_long.contract_long.prepend_1
+    %label{ :for => "genecodis" }
+      Anaysis provided by
+      %a{ :href => "http://genecodis.dacya.ucm.es/" }
+        Genecodis
+    - if @job.goterms.empty?
+      #box.no_genecodis! 
+        %h5 
+          No GO terms where enriched
+    - else
+      = partial :genecodis, :with => {:goterms => @job.goterms, :genes_info => @job.genes_info}, :as => :info
+
+-# Gene Details
+%hr
+#contract_Gene_Details_title.contract_title.prepend_1
+  %h2
+    Gene Details
+  #contract_Gene_Details_short.contract_short
+    %dl
+      %dt
+        Genes
+      %dl
+        = @job.genes_info.collect{|gene, info| info[:name]}.join(", ")
+#contract_Gene_Details_long.contract_long.prepend_1.hide{ :style => "display: none;" }
+  = partial :gene_details, :with => {:genes_info => @job.genes_info, :group => nil}, :as => :info
+

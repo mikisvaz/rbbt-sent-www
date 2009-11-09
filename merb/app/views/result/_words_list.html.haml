@@ -1,0 +1,10 @@
+%ul.words
+  - info[:words].each do |word|
+    - if word =~ / /
+      - parts = word.split(/ /)
+      - original = parts.collect{|part| info[:stems][part].join(", ") if info[:stems][part] }.compact.collect{|part| "(" + part + ")"}.join(", ")
+    - else
+      - original = info[:stems][word].join(", ") if info[:stems][word]
+    %li 
+      %span.stem= word + ":"
+      %span.words= original
