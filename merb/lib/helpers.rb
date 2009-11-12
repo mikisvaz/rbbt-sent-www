@@ -24,7 +24,6 @@ module CacheHelper
   end
 
   def cache(name, key = [], &block)
-    return block.call
     if Merb::Cache[:tmp_cache].exists?(name, key)
       Merb::Cache[:tmp_cache].read(name, key)
     else
