@@ -21,6 +21,7 @@ require 'rmail'
 require 'net/smtp'    
 require 'sass'    
 require 'soap/wsdlDriver'
+require 'markaby'
 
 log_dir = File.join(Sent.workdir, 'merb', 'log')
 FileUtils.mkdir_p log_dir unless File.exists? log_dir

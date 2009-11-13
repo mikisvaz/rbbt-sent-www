@@ -26,6 +26,7 @@ begin
     gem.add_dependency('RedCloth')
     gem.add_dependency('rand')
     gem.add_dependency('xml-simple')
+    gem.add_dependency('markaby')
 
 
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
