@@ -22,6 +22,7 @@ require 'net/smtp'
 require 'sass'    
 require 'soap/wsdlDriver'
 require 'markaby'
+require 'redcloth'
 
 log_dir = File.join(Sent.workdir, 'merb', 'log')
 FileUtils.mkdir_p log_dir unless File.exists? log_dir
@@ -35,6 +36,8 @@ Merb::Config.use do |c|
   c[:session_secret_key]  = 'bb1ab9154b55916ef514cf94e74b549753603d9c'  # required for cookie session store
   c[:session_id_key] = '_sent_session_id' # cookie session id key, defaults to "_session_id"
 end
+
+module RedCloth::Formatters::HTML def br(opts); "\n"; end end
  
 Merb::BootLoader.before_app_loads do
   require 'lib/helpers'
