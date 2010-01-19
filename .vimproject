@@ -67,8 +67,9 @@ rbbt-sent-www=/$PWD filter="*.R *.rb *.sh *.txt *.rake Rakefile" {
     wait.html.haml
    }
    main=main{
-    index.html.haml
+    _citation.html.haml
     error.html.haml
+    index.html.haml
    }
    exceptions=exceptions{
     not_acceptable.html.erb
