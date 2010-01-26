@@ -21,7 +21,7 @@ begin
     gem.add_dependency('rbbt')
 
     gem.add_dependency('merb')
-    gem.add_dependency('simplews')
+    gem.add_dependency('simplews', '>= 1.8')
     gem.add_dependency('rmail')
     gem.add_dependency('RedCloth')
     gem.add_dependency('rand')

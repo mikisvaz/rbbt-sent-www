@@ -287,9 +287,8 @@ class Job
       ].zip(results){|p|
         file =  File.join(RESULTS_DIR, p[0])
         if !File.exists?(file)
-          data = drv.result(p[1])
-          data = Base64.decode64(data) if file =~ /\.jpg$/
-            Open.write(file, data )
+          data = Base64.decode64(drv.result(p[1]))
+          Open.write(file, data)
         end
       }
     end
