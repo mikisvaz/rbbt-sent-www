@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rbbt-sent-www}
-  s.version = "1.0.2"
+  s.version = "1.0.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Miguel Vazquez"]
-  s.date = %q{2009-11-17}
+  s.date = %q{2010-01-26}
   s.description = %q{This package contains a SOAP web server and a merb application.}
   s.email = %q{miguel.vazquez@fdi.ucm.es}
   s.extra_rdoc_files = [
@@ -37,7 +37,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<MARQ>, [">= 0"])
       s.add_runtime_dependency(%q<rbbt>, [">= 0"])
       s.add_runtime_dependency(%q<merb>, [">= 0"])
-      s.add_runtime_dependency(%q<simplews>, [">= 0"])
+      s.add_runtime_dependency(%q<simplews>, [">= 1.8"])
       s.add_runtime_dependency(%q<rmail>, [">= 0"])
       s.add_runtime_dependency(%q<RedCloth>, [">= 0"])
       s.add_runtime_dependency(%q<rand>, [">= 0"])
@@ -47,7 +47,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<MARQ>, [">= 0"])
       s.add_dependency(%q<rbbt>, [">= 0"])
       s.add_dependency(%q<merb>, [">= 0"])
-      s.add_dependency(%q<simplews>, [">= 0"])
+      s.add_dependency(%q<simplews>, [">= 1.8"])
       s.add_dependency(%q<rmail>, [">= 0"])
       s.add_dependency(%q<RedCloth>, [">= 0"])
       s.add_dependency(%q<rand>, [">= 0"])
@@ -58,7 +58,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<MARQ>, [">= 0"])
     s.add_dependency(%q<rbbt>, [">= 0"])
     s.add_dependency(%q<merb>, [">= 0"])
-    s.add_dependency(%q<simplews>, [">= 0"])
+    s.add_dependency(%q<simplews>, [">= 1.8"])
     s.add_dependency(%q<rmail>, [">= 0"])
     s.add_dependency(%q<RedCloth>, [">= 0"])
     s.add_dependency(%q<rand>, [">= 0"])
