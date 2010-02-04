@@ -35,12 +35,14 @@ class Job
 
     def self.gene_url(org, gene)
       case org.to_s
-      when 'sgd':  return "http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=" + gene 
-      when 'cgd':  return "http://www.candidagenome.org/cgi-bin/locus.pl?dbid=" + gene 
-      when 'rgd':  return "http://rgd.mcw.edu/tools/genes/genes_view.cgi?id=" + gene.sub(/RGD:/,'') 
-      when 'mgi':  return "http://www.informatics.jax.org/javawi2/servlet/WIFetch?page=markerDetail&id=" + gene
-      when 'pombe':  return "http://www.genedb.org/genedb/Search?organism=pombe&isid=true&name=" + gene
-      when 'human':  return "http://www.ncbi.nlm.nih.gov/sites/entrez?Db=gene&Cmd=ShowDetailView&ordinalpos=1&itool=EntrezSystem2.PEntrez.Gene.Gene_ResultsPanel.Gene_RVDocSum&TermToSearch=" + gene
+      when 'Sc':  return "http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=" + gene 
+      when 'Ca':  return "http://www.candidagenome.org/cgi-bin/locus.pl?dbid=" + gene 
+      when 'Rn':  return "http://rgd.mcw.edu/tools/genes/genes_view.cgi?id=" + gene.sub(/RGD:/,'') 
+      when 'Mm':  return "http://www.informatics.jax.org/javawi2/servlet/WIFetch?page=markerDetail&id=" + gene
+      when 'Sp':  return "http://www.genedb.org/genedb/Search?organism=pombe&isid=true&name=" + gene
+      when 'Hs':  return "http://www.ncbi.nlm.nih.gov/sites/entrez?Db=gene&Cmd=ShowDetailView&ordinalpos=1&itool=EntrezSystem2.PEntrez.Gene.Gene_ResultsPanel.Gene_RVDocSum&TermToSearch=" + gene
+      when 'Ce':  return "http://www.wormbase.org/db/gene/gene?name=#{gene};class=Gene"
+      when 'At':  return "http://www.arabidopsis.org/servlets/Search?type=general&search_action=detail&method=1&show_obsolete=F&name=#{gene}&sub_type=gene&SEARCH_EXACT=4&SEARCH_CONTAINS=1"
       else return nil
       end
     end
@@ -78,19 +80,9 @@ class Job
       driver
     end
 
-    ORGS = {
-        'sgd' => 'Sc' ,
-        'rgd' => 'Rn' ,
-        'mgi' => 'Mm' ,
-        'pombe' => 'Sp' ,
-        'cgd' => 'Ca' ,
-        'human' => 'Hs' ,
-        'tair' => 'At' ,
-        'worm' => 'Ce' ,
-    }
     def self.analysis(org, list)
 
-      gc_org = ORGS[org.to_s]
+      gc_org = org
       return [] if gc_org.nil?
 
       job_id = driver.analyze(gc_org,2,0,-1,3,list,%w(GO_Biological_Process ),[])  

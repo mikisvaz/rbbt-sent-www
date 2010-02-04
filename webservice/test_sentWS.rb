@@ -19,8 +19,8 @@ class TestSentWS < Test::Unit::TestCase
     require 'simplews'
     driver = SimpleWS.get_driver('http://localhost:1984', "SentWS")
 
-    if File.exists?(File.join(Sent.datadir, 'analysis/associations/sgd.description'))
-      assert(driver.description('sgd') =~ /Saccharomyces/)
+    if File.exists?(File.join(Sent.datadir, 'analysis/associations/Sc.description'))
+      assert(driver.description('Sc') =~ /Saccharomyces/)
     end
     
     ds = Dir.glob(File.join(Sent.datadir, 'analysis/associations/') + '*.description').collect{|f|
@@ -31,7 +31,7 @@ class TestSentWS < Test::Unit::TestCase
 
 
     # Test simple job
-    name = driver.analyze('sgd', %w(S000000003 S000000004 S000000013 S000000019 S000000022 S000000024 S000000065 S000000099),2,"test")
+    name = driver.analyze('Sc', %w(S000000003 S000000004 S000000013 S000000019 S000000022 S000000024 S000000065 S000000099),2,"test")
     while !driver.done(name)
       puts "[#{ name }]: " + driver.messages(name).last
       sleep 5
@@ -77,7 +77,7 @@ class TestSentWS < Test::Unit::TestCase
     end
 
     # Test fine grained job
-    name = driver.fine_grained('sgd', %w(S000000003 S000000004 S000000013 S000000019 S000000022 S000000024 S000000065 S000000099),2,2,"fine")
+    name = driver.fine_grained('Sc', %w(S000000003 S000000004 S000000013 S000000019 S000000022 S000000024 S000000065 S000000099),2,2,"fine")
     while !driver.done(name)
       puts "[#{ name }]: " + driver.messages(name).last
       sleep 2
