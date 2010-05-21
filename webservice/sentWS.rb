@@ -428,7 +428,16 @@ if __FILE__  == $0
   FileUtils.mkdir_p wsdl_dir unless File.exist? wsdl_dir
   Open.write(File.join(wsdl_dir, 'SentWS.wsdl'), server.wsdl)
 
+  documentation_dir = File.join(Sent.workdir, 'webservice', 'documentation')
+  FileUtils.mkdir_p documentation_dir unless File.exist? documentation_dir
+  Open.write(File.join(documentation_dir, 'SentWS.documentation'), server.documentation)
+
+  log_dir = File.join(Sent.workdir, 'webservice', 'log')
+  FileUtils.mkdir_p log_dir unless File.exist? log_dir
+  server.logtofile(File.join(log_dir, 'SentWS.log'))
+
   trap('INT') { server.abort_jobs; server.shutdown }
   server.start
 
 end
+
