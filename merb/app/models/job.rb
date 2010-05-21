@@ -298,11 +298,11 @@ class Job
     else
       begin
         info = WS::info(name)
-      rescue
-        raise JobNotFound, "Job with name #{ name } not found."
-        data = {:range => [info[:factors]]} 
+        data = {:range => [info[:factors]] || []} 
         save(name, data)
         return data
+      rescue
+        raise JobNotFound, "Job with name #{ name } not found."
       end
     end
   end
