@@ -87,7 +87,7 @@ puts ""
 puts "Gathering results to directory #{realname}/"
 FileUtils.mkdir(realname) unless File.exist?(realname)  
 
-results = driver.results(name)
+results = driver.results(realname)
 [
 "#{realname}/summary.yaml",
 "#{realname}/cophenetic",
