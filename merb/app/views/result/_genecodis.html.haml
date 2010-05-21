@@ -13,22 +13,22 @@
         P-Value
       %th.span_8.last
         GO Terms
-    - goterms.each do |term|
+    - goterms.sort_by{|info| info["Hyp_c"]}.each do |term|
       %tr 
         %td 
-          - links = term[:genes].collect do |gene| 
+          - links = term["Genes"].collect do |gene| 
             - gene_info = genes_info[gene] 
             - capture_haml(gene_info) do |gene_info|
               %a{ :title => gene_info[:synonyms].join(", "), :href => gene_info[:url] || "#"} 
                 = gene_info[:name] 
           = links.join(", ") 
 
-        %td.support=        term[:support]
-        %td.total_support=  term[:total_support]
-        %td.pvalue=         "%1.4g" % term[:pvalue]
+        %td.support=        term["S"]
+        %td.total_support=  term["TS"]
+        %td.pvalue=         "%1.4g" % term["Hyp_c"]
         %td 
           %ul.goterms 
-            - term[:go_terms].sort.each do |goterm|
+            - term["Items"].sort.each do |goterm|
               %li= go_info(goterm)
               
 

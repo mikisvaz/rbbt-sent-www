@@ -35,14 +35,14 @@ class Job
 
     def self.gene_url(org, gene)
       case org.to_s
-      when 'Sc':  return "http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=" + gene 
-      when 'Ca':  return "http://www.candidagenome.org/cgi-bin/locus.pl?dbid=" + gene 
-      when 'Rn':  return "http://rgd.mcw.edu/tools/genes/genes_view.cgi?id=" + gene.sub(/RGD:/,'') 
-      when 'Mm':  return "http://www.informatics.jax.org/javawi2/servlet/WIFetch?page=markerDetail&id=" + gene
-      when 'Sp':  return "http://www.genedb.org/genedb/Search?organism=pombe&isid=true&name=" + gene
-      when 'Hs':  return "http://www.ncbi.nlm.nih.gov/sites/entrez?Db=gene&Cmd=ShowDetailView&ordinalpos=1&itool=EntrezSystem2.PEntrez.Gene.Gene_ResultsPanel.Gene_RVDocSum&TermToSearch=" + gene
-      when 'Ce':  return "http://www.wormbase.org/db/gene/gene?name=#{gene};class=Gene"
-      when 'At':  return "http://www.arabidopsis.org/servlets/Search?type=general&search_action=detail&method=1&show_obsolete=F&name=#{gene}&sub_type=gene&SEARCH_EXACT=4&SEARCH_CONTAINS=1"
+      when 'Sce':  return "http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=" + gene 
+      when 'Cal':  return "http://www.candidagenome.org/cgi-bin/locus.pl?dbid=" + gene 
+      when 'Rno':  return "http://rgd.mcw.edu/tools/genes/genes_view.cgi?id=" + gene.sub(/RGD:/,'') 
+      when 'Mmu':  return "http://www.informatics.jax.org/javawi2/servlet/WIFetch?page=markerDetail&id=" + gene
+      when 'Spo':  return "http://www.genedb.org/genedb/Search?organism=pombe&isid=true&name=" + gene
+      when 'Hsa':  return "http://www.ncbi.nlm.nih.gov/sites/entrez?Db=gene&Cmd=ShowDetailView&ordinalpos=1&itool=EntrezSystem2.PEntrez.Gene.Gene_ResultsPanel.Gene_RVDocSum&TermToSearch=" + gene
+      when 'Cel':  return "http://www.wormbase.org/db/gene/gene?name=#{gene};class=Gene"
+      when 'Ath':  return "http://www.arabidopsis.org/servlets/Search?type=general&search_action=detail&method=1&show_obsolete=F&name=#{gene}&sub_type=gene&SEARCH_EXACT=4&SEARCH_CONTAINS=1"
       else return nil
       end
     end
@@ -73,57 +73,6 @@ class Job
 
   end
 
-  module Genecodis
-    def self.driver
-      wsdl_url = File.join('http://genecodis.dacya.ucm.es/static/wsdl/genecodisWS.wsdl')
-      driver = SOAP::WSDLDriverFactory.new(wsdl_url).create_rpc_driver
-      driver
-    end
-
-    def self.analysis(org, list)
-
-      gc_org = org
-      return [] if gc_org.nil?
-
-      job_id = driver.analyze(gc_org,2,0,-1,3,list,%w(GO_Biological_Process ),[])  
-
-
-      while (stat = driver.status(job_id)) == 1
-        sleep 1
-      end
-
-      if stat < 0
-        return []
-      else
-        xml = XmlSimple.xml_in( driver.resultsxml(job_id) )
-
-        
-        return [] if xml["Result"].nil? || xml["Result"].empty?
-
-        goterms = xml["Result"].sort{|a,b|
-          a["Hyp_c"].first.to_f <=> b["Hyp_c"].first.to_f
-        }.select{|res|
-          res["Hyp_c"].first.to_f < 0.01
-        }.collect{|res|
-          {
-            :support       => res["S"].first,
-            :total_support => res["TS"].first,
-            :pvalue        => res["Hyp_c"].first.to_f,
-            :go_terms      => res["Items"].first["Item"],
-            :genes         => res["Genes"].first["Gene"].collect{|g| g['content']},
-          }
-        }
-
-        goterms
-      end
-    rescue
-      puts $!.message
-      puts $!.backtrace
-      []
-    end
-  end
-
-
   module WS
     class << self
       include CacheHelper
@@ -144,38 +93,21 @@ class Job
     def self.associations(name)
       marshal_cache("associations_#{name}") do
         drv = driver
-        associations = {}
-        drv.associations(name).each{|l|
-          values = l.chomp.split(/\t/)
-          gene = values.shift
-          associations[gene] ||= []
-          associations[gene] += values
-        }
-        associations
+        Open.to_hash(StringIO.new(drv.associations(name)), :flatten => true)
       end
     end
 
     def self.stems(name)
       marshal_cache("stems_#{name}") do
         drv = driver
-        stems = {}
-        drv.stems(name).each{|l|
-          values = l.chomp.split(/\t/)
-          stems[values.shift] = values
-        }
-        stems
+        Open.to_hash(StringIO.new(drv.stems(name)), :flatten => true)
       end
     end
 
     def self.ranks(name, words)
       marshal_cache("ranks_#{name}_#{words.sort.inspect}") do
         drv = driver
-        ranks = {}
-        drv.search_literature(name, words).each{|l|
-          pmid, score = l.chomp.split(/\t/)
-          ranks[pmid] = score
-        }
-        ranks
+        Open.to_hash(StringIO.new(drv.search_literature(name, words)), :flatten => true)
       end
     end
 
@@ -438,7 +370,7 @@ class Job
     if info[:custom] 
       info[:associations].select{|l| l =~ /\t/}.collect{|l| l.split(/\t/).first.strip}.compact.uniq
     else
-      info[:translated].compact.collect{|n| n.strip}
+      info[:genes].compact.collect{|n| n.strip}
     end
   end
 
@@ -449,12 +381,14 @@ class Job
     if info[:custom]
       Hash[*genes.collect{|n| n.strip if n}.zip(genes.collect{|n| n.strip}).flatten]
     else
-      Hash[*info[:translated].collect{|n| n.strip if n}.zip(info[:list].collect{|n| n.strip}).flatten]
+      Hash[*info[:genes].collect{|n| n.strip if n}.zip(info[:original].collect{|n| n.strip}).flatten]
     end
   end
 
   def self.process(name)
     data = data(name)
+    p name
+    p data
     raise  InProgress unless WS::done?(name)
     data.delete(:refactor) if data[:refactor]
     data.delete(:recluster) if data[:recluster]
@@ -597,7 +531,7 @@ class Job
     if info[:custom]
       return []
     else
-      data_store[:missing_genes] ||= info[:list].zip(info[:translated]).select{|p| p[1] !~ /\w/}.collect{|p| p[0]}
+      data_store[:missing_genes] ||= info[:original].zip(info[:genes]).select{|p| p[1] !~ /\w/}.collect{|p| p[0]}
     end
     data_store[:missing_genes]
   end
@@ -608,7 +542,7 @@ class Job
       codes = info[:associations].each{|l| l.chomp.split(/\t/).first}
       data_store[:synonyms] ||= Hash[*codes.zip(codes).flatten]
     else
-      data_store[:synonyms] ||= Job::Info::lexicon(info[:org]).slice(self.genes)
+      data_store[:synonyms] ||= Job::Info::lexicon(info[:organism]).slice(self.genes)
     end
 
     if genes
@@ -654,7 +588,7 @@ class Job
 
   def goterms(genes = nil)
     genes ||= self.genes
-    data_store["goterms_" + genes.sort.inspect] ||= Genecodis::analysis(info[:org], genes)
+    data_store["goterms_" + genes.sort.inspect] ||= Genecodis.analysis(info[:organism], 'biological_process', genes, :algorithm => Genecodis::Algorithm::SINGLE)
   end
 
   def groups_info
@@ -704,14 +638,14 @@ class Job
 
 
   def genes_info(genes = nil)
-    data[:genes_info] ||= marshal_cache("genes_info#{Digest::MD5.hexdigest(self.genes.sort.inspect)}_#{info[:org]}") do
+    data[:genes_info] ||= marshal_cache("genes_info#{Digest::MD5.hexdigest(self.genes.sort.inspect)}_#{info[:organism]}") do
       genes_info = {}
       self.genes.each{|gene|
         gene_info = {}
         gene_info[:name]     = translations[gene]
-        if info[:org] 
-          gene_info[:url]      = Info::gene_url(info[:org], gene)
-          gene_info[:goterms]  = Info::goterms(info[:org], gene) || [] 
+        if info[:organism] 
+          gene_info[:url]      = Info::gene_url(info[:organism], gene)
+          gene_info[:goterms]  = Info::goterms(info[:organism], gene) || [] 
         else
           gene_info[:goterms]  = [] 
           gene_info[:url]      = nil

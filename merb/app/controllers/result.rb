@@ -4,16 +4,18 @@ class Result < Application
   def wait(name, factors)
     job = Job.new(name, factors)
     @messages = [
-            "Translating Genes",
-            "Preparing Metadocs",
-            "Preparing Matrix",
-            "Performing Factorization",
-            "Analyzing Results",
+            "Translate genes",
+            "Build gene term matrix",
+            "Build dictionary",
+            "Build metadocument",
+            "Perform NMF",
+            "Analyze results",
     ]
     @times = Hash[*@messages.zip([
             '1 min.',
-            '5-20 min.',
-            '3 min.',
+            '1 min.',
+            '5-10 min.',
+            '5-10 min.',
             '3-5 min.',
             '1 min.',
     ]).flatten]
@@ -23,21 +25,23 @@ class Result < Application
     if ['queued', 'prepared'].include?  Job.status(name)
       @in_queue = true
     else
-      
 
       @current = job.real_messages.select{|m| @messages.include? m.chomp}.last
-      @done = @messages.clone
+      @done    = @messages.clone
       @missing = []
+
       while @done.any? && @done.last != @current
         @missing << @done.pop
       end
+
       @missing.reverse!
       @done.delete(@current)
-      @done    = @done.select{|msg| msg !~/Preparing Metadocs/} unless (info[:fine] || info[:custom])
-      @missing = @missing.select{|msg| msg !~/Preparing Metadocs/} unless (info[:fine] || info[:custom])
+      @done    = @done.select{|msg| msg !~/gene term matrix/} if (info[:fine] || info[:custom])
+      @done    = @done.select{|msg| msg !~/dictionary|metadocument/} unless (info[:fine] || info[:custom])
+      @missing = @missing.select{|msg| msg !~/dictionary|metadocument/} unless (info[:fine] || info[:custom])
 
-      @done = @done.select{|msg| msg !~/Translating Genes/}      if info[:custom]
-      @missing = @missing.select{|msg| msg !~/Translating Genes/} if info[:custom]
+      @done    = @done.select{|msg| msg !~/Translate/}       if info[:custom]
+      @missing = @missing.select{|msg| msg !~/Translate/}    if info[:custom]
 
     end
     @factors = job.factors
@@ -68,7 +72,7 @@ class Result < Application
 
       return wait(name, nil) if @factors.nil?
 
-      if !Job.range(name).include? @factors
+      if Job.range(name).any? && !Job.range(name).include?(@factors)
         raise "The job has not explored the value #{@factors} for the number of factors."
       end
 

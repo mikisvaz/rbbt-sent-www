@@ -17,8 +17,8 @@ begin
     gem.files.exclude 'merb/public/results'
     gem.files.exclude 'merb/public/data'
 
-    gem.add_dependency('MARQ')
     gem.add_dependency('rbbt')
+    gem.add_dependency('rbbt-genecodis')
 
     gem.add_dependency('merb')
     gem.add_dependency('simplews', '>= 1.8')

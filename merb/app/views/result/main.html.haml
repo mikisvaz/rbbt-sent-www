@@ -84,7 +84,7 @@
       - if @job['custom']
         %dd= @job.genes.length
       - else
-        %dd= @job['translated'].length
+        %dd= @job['genes'].length
 
       %dt
         Articles:
@@ -104,7 +104,7 @@
             - if k == @job.factors
               %span.current= k
             - else
-              =k
+              = k
             - if i != @job.range.length - 1
               ,
 

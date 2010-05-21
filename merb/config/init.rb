@@ -23,6 +23,7 @@ require 'sass'
 require 'soap/wsdlDriver'
 require 'markaby'
 require 'redcloth'
+require 'genecodis/main'
 
 log_dir = File.join(Sent.workdir, 'merb', 'log')
 FileUtils.mkdir_p log_dir unless File.exists? log_dir
