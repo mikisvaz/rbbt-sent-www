@@ -271,7 +271,7 @@ class Result < Application
 
       case
       when Job.done(name).include?(@factors)
-        show_literature(name, @factors,group, gene, words, page, size)
+        show_literature(name, @factors, group, gene, words, page, size)
       when Job.failed(name).include?(@factors)
         raise Job.error(name)
       when Job.in_process(name) == @factors 
@@ -279,7 +279,7 @@ class Result < Application
       else 
         case
         when Job::success?(name)
-          show_literature(name, @factors,group, gene, words, page, size)
+          show_literature(name, @factors, group, gene, words, page, size)
         when Job::error?(name)
           raise Job::messages(name).last
         else 
