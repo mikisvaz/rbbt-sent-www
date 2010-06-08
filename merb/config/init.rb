@@ -69,7 +69,7 @@ Merb::BootLoader.after_app_loads do
   wsdl_file = File.join(wsdl_dir, 'SentWS.wsdl')
   if ! File.exists? wsdl_file
     FileUtils.mkdir_p wsdl_dir unless File.exists? wsdl_dir
-    FileUtils.ln_s(File.join(Sent.workdir, 'webservice', 'wsdl', 'SentWS.wsdl'), wsdl_file)
+    FileUtils.ln_s(File.join(Sent.workdir, 'webservice', 'wsdl', 'SentWS.wsdl'), wsdl_file) unless File.exists?(File.join(Sent.workdir, 'webservice', 'wsdl', 'SentWS.wsdl'))
   end
 
 end

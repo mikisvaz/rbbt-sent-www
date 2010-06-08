@@ -107,7 +107,7 @@ class Job
     def self.ranks(name, words)
       marshal_cache("ranks_#{name}_#{words.sort.inspect}") do
         drv = driver
-        Open.to_hash(StringIO.new(drv.search_literature(name, words)), :flatten => true)
+        Open.to_hash(StringIO.new(drv.search_literature(name, words)), :single => true)
       end
     end
 
@@ -387,8 +387,6 @@ class Job
 
   def self.process(name)
     data = data(name)
-    p name
-    p data
     raise  InProgress unless WS::done?(name)
     data.delete(:refactor) if data[:refactor]
     data.delete(:recluster) if data[:recluster]
